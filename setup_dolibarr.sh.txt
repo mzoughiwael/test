@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Update and upgrade system packages
+apt update
+apt upgrade -y
+
+# Install Apache
+apt install apache2 -y
+
+# Start and enable Apache service
+systemctl start apache2
+systemctl enable apache2
+
+# Allow HTTP, HTTPS, and SSH through UFW
+ufw allow http
+ufw allow https
+ufw allow ssh
+ufw --force enable
+
+# Enable SSL module for Apache
+a2enmod ssl
+
+# Restart Apache
+systemctl restart apache2
+
+# Create a new Apache configuration file
+sudo tee /etc/apache2/sites-available/dolibarr.conf > /dev/null <<EOT
+<VirtualHost *:80>
+    ServerName crm
+    Redirect / https://52.158.42.112/
+</VirtualHost>
+<VirtualHost *:443>
+    ServerName crm
+    DocumentRoot /var/www/html/dolibarr/
+
+    <Directory /srv/dolibarr>
+        Options +FollowSymlinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/certs/apache-selfsigned.key
+</VirtualHost>
+EOT
+
+# Generate a self-signed SSL certificate
+#sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/certs/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+
+# Install PHP and required modules
+apt-get install php php-cli php-mysql php-common php-zip php-mbstring php-xmlrpc php-curl php-soap php-gd php-xml php-intl php-ldap libapache2-mod-php -y
+
+# Test Apache configuration
+apachectl configtest
+
+# Enable Dolibarr site and disable the default site
+a2ensite dolibarr
+a2dissite 000-default.conf
+
+# Enable Apache rewrite module
+a2enmod rewrite
+
+# Create Dolibarr directories and set permissions
+mkdir /srv/dolibarr
+mkdir /var/www/html/dolibarr
+chown -R www-data:www-data /var/www/html/dolibarr
+chown -R www-data:www-data /var/www/html
+
+# Restart Apache
+systemctl restart apache2
+
+# Check UFW status
+ufw status

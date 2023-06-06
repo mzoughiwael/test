@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Mise à jour du système
+sudo apt update
+sudo apt upgrade -y
+
+# Installation des dépendances requises
+sudo apt install -y apache2 mariadb-server php libapache2-mod-php php-mysql php-curl php-gd php-xml php-json php-mbstring php-zip unzip
+
+# Téléchargement de Dolibarr
+wget https://sourceforge.net/projects/dolibarr/files/latest/download -O dolibarr.zip
+unzip dolibarr.zip
+rm dolibarr.zip
+sudo mv dolibarr-* /var/www/html/dolibarr
+
+# Configuration de la base de données MariaDB
+sudo mysql -e "CREATE DATABASE dolibarr;"
+sudo mysql -e "CREATE USER 'dolibarr'@'localhost' IDENTIFIED BY 'password';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON dolibarr.* TO 'dolibarr'@'localhost';"
+sudo mysql -e "FLUSH PRIVILEGES;"
+
+# Configuration d'Apache
+sudo cp /var/www/html/dolibarr/install/apache.conf /etc/apache2/sites-available/dolibarr.conf
+sudo ln -s /etc/apache2/sites-available/dolibarr.conf /etc/apache2/sites-enabled/dolibarr.conf
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+
+# Configuration de Dolibarr
+sudo cp /var/www/html/dolibarr/htdocs/conf/conf.php.sample /var/www/html/dolibarr/htdocs/conf/conf.php
+sudo chmod 666 /var/www/html/dolibarr/htdocs/conf/conf.php
+
+# Accès à Dolibarr via le navigateur
+echo "Dolibarr a été installé avec succès."
+echo "Accédez à votre site Dolibarr via l'URL : http://localhost/dolibarr"
+echo "Suivez les étapes d'installation et utilisez les informations de la base de données suivantes :"
+echo "Nom de la base de données : dolibarr"
+echo "Utilisateur de la base de données : dolibarr"
+echo "Mot de passe de la base de données : password"
