@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - main
+
+jobs:
+- job: CopyScriptToVM
+  displayName: 'Copy Script to VM'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: self
+
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifactName: 'test'
+      downloadPath: '$(Pipeline.Workspace)/artifacts'
+
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Pipeline.Workspace)/artifacts'
+      Contents: 'setup_dolibarr.sh'
+      TargetFolder: '/home/wael'
+
+  - task: SSH@0
+    inputs:
+      sshEndpoint: 'your-ssh-service-connection'
+      runOptions: 'script'
+      scriptType: 'bash'
+      inlineScript: |
+        cd /home/wael
+        chmod +x setup_dolibarr.sh
+        ./setup_dolibarr.sh
