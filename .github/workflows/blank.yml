@@ -1,0 +1,46 @@
+# This is a basic workflow that is manually triggered
+
+
+name: Azure Deployment
+
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    # Inputs the workflow accepts.
+    branches:
+      - main
+
+
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+
+  deploy:
+    runs-on: ubuntu-latest
+
+
+  # This workflow contains a single job called "greet"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+          az version
+
+      - name: Azure Login
+        run: az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+
+      - name: Deploy Bicep Template
+        run: az deployment group create --resource-group waelaz900 --template-file main.bicep --parameters adminPassword=${{ secrets.VM_PASSWORD_AZUR }}
+
+
+
