@@ -35,7 +35,7 @@ jobs:
           az version
 
       - name: Azure Login
-        run: az login --service-principal --username ${{ secrets.AZURE_CLIENT_ID }} --password ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+        run: az login --subscription ${{ secrets.AZURE_ABONNEMENT_ID }} 
 
 
       - name: Deploy Bicep Template
