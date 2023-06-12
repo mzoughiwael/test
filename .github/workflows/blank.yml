@@ -35,7 +35,7 @@ jobs:
           az version
 
       - name: Azure Login
-        run: az login --subscription ${{ secrets.AZURE_ABONNEMENT_ID }} 
+        run: az account --subscription ${{ secrets.AZURE_ABONNEMENT_ID }} 
 
 
       - name: Deploy Bicep Template
