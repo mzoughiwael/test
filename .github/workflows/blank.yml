@@ -40,7 +40,7 @@ jobs:
 
 
       - name: Deploy Bicep Template
-        run: az deployment group create --resource-group waelaz900 --template-file main.bicep --parameters adminPassword=${{ secrets.VM_PASSWORD_AZUR }}
+        run: az deployment group create --resource-group waelaz900 --template-file Main.bicep --parameters adminPassword=${{ secrets.VM_PASSWORD_AZUR }}
 
 
 
